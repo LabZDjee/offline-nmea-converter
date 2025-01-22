@@ -93,9 +93,13 @@
                     counter.gpgga = 0;
 
                     var full_file_namefile = escape(file.name);
-                    var extention_str = (full_file_namefile.split('.', 2))[1];
-                    now_filename = (full_file_namefile.split('.', 1))[0];
-                    if (extention_str.toUpperCase() == 'NMEA') {
+                    var extension_pos = full_file_namefile.lastIndexOf('.');
+                    var extention_str = undefined;
+                    if (extension_pos  >= 0) {
+                        now_filename = full_file_namefile.substr(0, extension_pos);
+                        extension_str = full_file_namefile.substr(extension_pos + 1);
+                    }
+                    if (extension_str !== undefined && extension_str.toUpperCase() === 'NMEA') {
                         //FileReaderの作成
                         var reader = new FileReader();
                         //テキスト形式で読み込む
