@@ -34,5 +34,8 @@ Here are the following changes:
 - when dropped file is not accepted because of its extension is not *.nmea*, a warning message box pops up and result pane is hidden.
 - translates some more Japanese texts into English.
 - corrects *NEMA* as *NMEA* in some places: *NEMA* renamed *NMEA* wherever found.
-- fix: GPGGA and GPRMC counters are properly reset for each new dropped file.
+- fixes:
+  - months from GPRMC correctly managed (no longer one month ahead).
+  - GPGGA and GPRMC counters are properly reset for each new dropped file.
+
 
