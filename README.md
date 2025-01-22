@@ -30,7 +30,9 @@ Here are the following changes:
   are done based on hour-minute-second time stamp to be as
   close as possible to find matches (and to be less than one second to avoid silly matches). This process is much slower than before hence performance penalty on long NMEA files (technically each GPGGA is processed against *all* GPRMC records).
   This is a way to be independent of the order GPRMC/GPGGA like before where GPGGA  could not come first.
-- accepts *.nmea* filename extensions (not case sensitive).
+- accepts *.nmea* filename extensions (no longer case sensitive).
+- when dropped file is not accepted because of its extension is not *.nmea*, a warning message box pops up and result pane is hidden.
 - translates some more Japanese texts into English.
 - corrects *NEMA* as *NMEA* in some places: *NEMA* renamed *NMEA* wherever found.
+- fix: GPGGA and GPRMC counters are properly reset for each new dropped file.
 
