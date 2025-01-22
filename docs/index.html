@@ -147,7 +147,8 @@
                     var gprmc_ans = {};
                     var data = gprmc.split(',', 13);
                     //get timestamp
-                    gprmc_ans.ts = new Date("20" + data[9].substr(4, 2), data[9].substr(2, 2), data[9].substr(0, 2), data[1].substr(0, 2), data[1].substr(2, 2), data[1].substr(4, 2), data[1].substr(7, 3));
+                    var month_index_str = (Number.parseInt(data[9].substr(2, 2)) - 1).toString();
+                    gprmc_ans.ts = new Date("20" + data[9].substr(4, 2), month_index_str, data[9].substr(0, 2), data[1].substr(0, 2), data[1].substr(2, 2), data[1].substr(4, 2), data[1].substr(7, 3));
                     gprmc_ans.hms = parseFloat(data[1]);
                     //get gps_status
                     gprmc_ans.gps_status = data[2];
