@@ -89,9 +89,12 @@
                 function readNmea(file, id) {
                     $('#list').show();
                     ans = new Array();
+                    counter.gprmc = 0;
+                    counter.gpgga = 0;
 
-                    var extention_str = (escape(file.name).split('.', 2))[1];
-                    now_filename = (escape(file.name).split('.', 1))[0];
+                    var full_file_namefile = escape(file.name);
+                    var extention_str = (full_file_namefile.split('.', 2))[1];
+                    now_filename = (full_file_namefile.split('.', 1))[0];
                     if (extention_str.toUpperCase() == 'NMEA') {
                         //FileReaderの作成
                         var reader = new FileReader();
@@ -115,7 +118,6 @@
                                 }
                             }
                             for (var i = 0; i < line.length; i++) {
-
                                 switch (line[i].substr(1, 5)) {
                                     case 'GPGGA':
                                         var gpgga = readGPGGA(line[i]);
@@ -139,6 +141,9 @@
                                 "<div> GPRMC : " + counter.gprmc + " record(s) </div><div>");
 
                         }
+                    } else {
+                        $('#list').hide();
+                        window.alert("File " + full_file_namefile + " ignored. NMEA files to process should have a .nmea type extension.");
                     }
                     return counter;
                 }
