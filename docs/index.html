@@ -14,12 +14,12 @@
 <body>
     <div class="jumbotron">
         <h3 class="display-4">Offline NMEA Converter</h3>
-        <div>サーバにデータを送信しない安全なNEMAデータ変換ツール</div>
-        <div>NMEA形式のファイルをGPX,KML,CSVに変換します。</div>
+        <div>サーバにデータを送信しない安全な NMEA データ変換ツール</div>
+        <div>NMEA形式のファイルを GPX, KML, CSV に変換します。</div>
         <hr />
         <div id="drop_zone" class="alert alert-light text-center" role="alert">
-            <h5>Drop NMEA file here</h5>
-            <br>こちらにNEMA形式のファイルをドロップして下さい
+            <h5>Drop .NMEA file here</h5>
+            <br>こちらに .NMEA形式のファイルをドロップして下さい
         </div>
     </div>
     <!-- Optional JavaScript -->
@@ -30,7 +30,7 @@
     <div class="container w-100">
         <div id="list" style="display:none">
             <div class="card w-100">
-                <h6 class="card-header">分析結果</h6>
+                <h6 class="card-header">分析結果 - Result</h6>
                 <div class="card-block" style="padding:6px;">
                     <h6 class="card-title" id="filename"></h6>
                     <p class="card-text" id="filetimestamp"></p>
@@ -55,11 +55,11 @@
                     // files is a FileList of File objects. List some properties.
                     var output = [];
                     for (var i = 0, f; f = files[i]; i++) {
-                        var a = readNema(f, i); //注意非同期処理
+                        var a = readNmea(f, i); //注意非同期処理
 
-                        $('#filename').html("ファイル名 : " + now_filename + ".NEMA");
+                        $('#filename').html("ファイル名 - filename: " + now_filename + ".NMEA");
                         //$('#list').html(output.join(''));
-                        $('#filetimestamp').html("作成日 : " + f.lastModifiedDate.toLocaleDateString() +
+                        $('#filetimestamp').html("作成日 - creation date: " + f.lastModifiedDate.toLocaleDateString() +
                             " " + f.lastModifiedDate.toLocaleTimeString());
 
                     }
@@ -86,13 +86,13 @@
                     "gpgga": 0
                 };
 
-                function readNema(file, id) {
+                function readNmea(file, id) {
                     $('#list').show();
                     ans = new Array();
 
                     var extention_str = (escape(file.name).split('.', 2))[1];
                     now_filename = (escape(file.name).split('.', 1))[0];
-                    if (extention_str == 'NMEA') {
+                    if (extention_str.toUpperCase() == 'NMEA') {
                         //FileReaderの作成
                         var reader = new FileReader();
                         //テキスト形式で読み込む
@@ -101,7 +101,6 @@
                         //読込終了後の処理
                         reader.onload = function(ev) {
                             var line = reader.result.split('\r\n');
-                            var gprmc_ts;
                             for (var i = 0; i < line.length; i++) {
 
                                 switch (line[i].substr(1, 5)) {
@@ -112,40 +111,44 @@
                                             ans[gprmc.ts] = {};
                                         };
                                         ans[gprmc.ts].gprmc = gprmc;
-                                        gprmc_ts = gprmc.ts;
                                         break;
-                                    case 'GPGGA':
-                                        counter.gpgga++;
-                                        var gpgga = readGPGGA(line[i]);
-                                        if (ans[gpgga.ts] === undefined) {
-                                            break;
-                                        };
+                                }
+                            }
+                            for (var i = 0; i < line.length; i++) {
 
-                                        if (gpgga != -1) {
-                                            ans[gpgga.ts].gpgga = gpgga;
-                                        } else {
-                                            // delete ans[gprmc_ts].gprmc;
+                                switch (line[i].substr(1, 5)) {
+                                    case 'GPGGA':
+                                        var gpgga = readGPGGA(line[i]);
+                                        var minHms = {key: undefined, value: 1e99};
+                                        for(var key in ans) {
+                                            var absDiff = Math.abs(gpgga.hms - ans[key].gprmc.hms);
+                                            if(absDiff < minHms.value) {
+                                                minHms.value = absDiff;
+                                                minHms.key = key;
+                                            }
                                         }
+                                        if (minHms.value <= 1.0) {
+                                            counter.gpgga++;
+                                            ans[minHms.key].gpgga = gpgga;
+                                        };
                                         break;
                                 }
                             }
 
-                            $('#FileReadStatus').html("<div> GPGGA : " + counter.gpgga + " 行 </div><div>" +
-                                "<div> GPRMC : " + counter.gprmc + " 行 </div><div>");
+                            $('#FileReadStatus').html("<div> GPGGA : " + counter.gpgga + " record(s) </div><div>" +
+                                "<div> GPRMC : " + counter.gprmc + " record(s) </div><div>");
 
                         }
                     }
                     return counter;
                 }
-                var now_ts = {};
 
                 function readGPRMC(gprmc) {
                     var gprmc_ans = {};
                     var data = gprmc.split(',', 13);
                     //get timestamp
                     gprmc_ans.ts = new Date("20" + data[9].substr(4, 2), data[9].substr(2, 2), data[9].substr(0, 2), data[1].substr(0, 2), data[1].substr(2, 2), data[1].substr(4, 2), data[1].substr(7, 3));
-                    now_ts.ts_string = data[1];
-                    now_ts.ts = gprmc_ans.ts;
+                    gprmc_ans.hms = parseFloat(data[1]);
                     //get gps_status
                     gprmc_ans.gps_status = data[2];
                     //get lat
@@ -172,12 +175,7 @@
                     var gpgga_ans = {};
                     var data = gpgga.split(',', 15);
                     //get timestamp
-                    if (now_ts.ts_string == data[1]) {
-                        gpgga_ans.ts = now_ts.ts;
-                    } else {
-                        return -1;
-                    }
-
+                    gpgga_ans.hms = parseFloat(data[1])
                     //get lat
                     var lat = Math.floor(data[2] / 100) + (data[2] % 100) / 60;
                     if (data[3] == 'N') {
